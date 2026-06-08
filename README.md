@@ -7,6 +7,7 @@
  ║   |____/ \___/|_|_|_| |_|\__,_|\___/|____/                    ║
  ║                                                               ║
  ╚═══════════════════════════════════════════════════════════════╝
+```
 ## 🌌 Witaj w DolinaOS
 DolinaOS to projekt minimalistycznej dystrybucji systemu operacyjnego opartej na **Arch Linux**. Projekt został stworzony z myślą o maksymalnej wydajności, stabilności i estetyce, dedykowany dla użytkowników ceniących pełną kontrolę nad systemem.
 
