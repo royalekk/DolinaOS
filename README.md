@@ -24,7 +24,7 @@ DolinaOS to projekt minimalistycznej dystrybucji systemu operacyjnego opartej na
 ### 🛠️ Technologie
 - **Base:** Arch Linux
 - **Installer:** Custom Bash Scripts (Archiso)
-- **Desktop Environment:** XFCE
+- **Desktop Environment:** GNOME, HYPRLAND
 - **Package Management:** Pacman
 
 ---
