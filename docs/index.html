@@ -1,12 +1,523 @@
 <!DOCTYPE html>
-<html lang="pl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DolinaOS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html lang="pl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DolinaOS — Fast and Elegant OS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #06020a;
+            overflow-x: hidden;
+        }
+
+        .bg-grid {
+            background-size: 50px 50px;
+            background-image: linear-gradient(to right, rgba(157, 78, 221, 0.02) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(157, 78, 221, 0.02) 1px, transparent 1px);
+        }
+
+        /* Głębokie, fioletowo-neonowe poświaty gradientowe z Linexina */
+        .glow-overlay {
+            background: radial-gradient(circle 900px at 50% -200px, rgba(157, 78, 221, 0.18), transparent 70%),
+                        radial-gradient(circle 600px at 80% 600px, rgba(157, 78, 221, 0.06), transparent 60%);
+        }
+
+        /* Stan paska nawigacji */
+        #navbar-container {
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Stan paska po skrólowaniu */
+        #navbar-container.scrolled {
+            max-width: 960px;
+            margin-top: 1.25rem;
+            border-radius: 9999px;
+            background-color: rgba(15, 5, 24, 0.75);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border: 1px solid rgba(157, 78, 221, 0.2);
+            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.9), 0 0 25px rgba(157, 78, 221, 0.15);
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
+        }
+
+        /* Szklane kafelki Bento z mocnym neonowym podświetleniem (Glow Border) */
+        .bento-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .bento-card:hover {
+            border-color: rgba(157, 78, 221, 0.5);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 20px 40px -15px rgba(157, 78, 221, 0.25), 0 0 30px rgba(157, 78, 221, 0.1);
+        }
+
+        /* NOWOCZESNE SZKLANE AKORDEONY FAQ */
+        .faq-item {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .faq-item:hover {
+            border-color: rgba(157, 78, 221, 0.2);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        /* Styl aktywnego pytania */
+        .faq-item.active {
+            border-color: rgba(157, 78, 221, 0.4);
+            background-color: rgba(15, 5, 24, 0.6);
+            box-shadow: 0 15px 30px -10px rgba(157, 78, 221, 0.15);
+        }
+
+        /* Ultra płynne rozwijanie wysokości (0 -> auto) przy użyciu techniki CSS Grid */
+        .faq-content-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .faq-item.active .faq-content-wrapper {
+            grid-template-rows: 1fr;
+        }
+
+        /* Zmiana plusa w krzyżyk */
+        .faq-toggle {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease;
+        }
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+            color: #c8b6ff;
+        }
+
+        /* Animacje wyłaniania kafelków */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gradient-title {
+            background: linear-gradient(135deg, #ffffff 30%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #yt-modal {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-300 antialiased bg-grid relative selection:bg-[#9d4edd]/30">
+
+    <div class="absolute inset-0 glow-overlay pointer-events-none z-0"></div>
+
+    <div class="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 transition-all duration-300">
+        <nav id="navbar-container" class="max-w-6xl mx-auto w-full h-20 flex justify-between items-center border-b border-white/5 bg-transparent">
+
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-white to-zinc-400 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                    <span class="text-black font-extrabold text-sm tracking-tighter font-mono">D</span>
+                </div>
+                <span class="text-lg font-bold tracking-tight text-white font-mono">dolinaOS</span>
+            </div>
+
+            <div class="hidden md:flex items-center gap-8 text-sm text-gray-400 font-medium">
+                <a href="#features" class="hover:text-white transition-colors duration-200">Architektura</a>
+                <a href="#about" class="hover:text-white transition-colors duration-200">O projekcie</a>
+                <a href="#screenshots" class="hover:text-white transition-colors duration-200">Galeria</a>
+                <a href="#faq" class="hover:text-white transition-colors duration-200">FAQ</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="https://github.com/royalekk/DolinaOS" target="_blank" rel="noopener noreferrer" class="text-xs font-mono font-medium text-gray-400 hover:text-white bg-white/5 border border-white/5 px-3 py-2 rounded-xl hover:bg-white/10 hover:border-white/10 transition-all duration-200">
+                    GitHub
+                </a>
+                <button onclick="openYtModal()" class="text-xs font-mono font-medium text-gray-400 hover:text-red-400 bg-white/5 border border-white/5 px-3 py-2 rounded-xl hover:bg-white/10 hover:border-red-500/10 transition-all duration-200 cursor-pointer">
+                    YouTube
+                </button>
+                <a href="#" class="text-xs font-bold bg-white text-black px-4 py-2.5 rounded-full hover:bg-zinc-200 transition-all shadow-[0_4px_20px_rgba(255,255,255,0.2)]">
+                    Pobierz ISO
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <header class="max-w-4xl mx-auto px-6 pt-40 pb-20 text-center relative z-10 reveal">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#9d4edd]/30 bg-[#9d4edd]/10 text-[#c8b6ff] text-xs font-mono mb-8 tracking-wide shadow-[0_0_15px_rgba(157,78,221,0.15)]">
+            <span class="w-2 h-2 rounded-full bg-[#9d4edd] animate-pulse shadow-[0_0_10px_#9d4edd]"></span>
+            Stage: Arch Linux Base Build & Environment Setup
+        </div>
+
+        <h1 class="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-[1.05] gradient-title">
+            DolinaOS
+        </h1>
+
+        <p class="text-base md:text-xl text-gray-400 max-w-2xl mx-auto font-light leading-relaxed mb-12">
+            Niezależna dystrybucja tworzona na czystej architekturze. Eliminujemy bloatware, wprowadzamy zoptymalizowany kernel oraz minimalistyczny interfejs graficzny.
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-4">
+            <a href="#features" class="px-7 py-3.5 bg-white/5 border border-white/10 rounded-full text-sm font-semibold text-white hover:bg-white/10 hover:border-[#9d4edd]/30 transition-all backdrop-blur-md shadow-[0_0_30px_rgba(157,78,221,0.05)]">
+                Eksploruj projekt ↓
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-20 relative z-10">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="features">
+
+            <div class="bento-card col-span-1 md:col-span-2 p-8 md:p-10 rounded-3xl flex flex-col justify-between min-h-[320px] reveal">
+                <div class="text-xs font-mono font-semibold text-[#c8b6ff] bg-[#9d4edd]/10 border border-[#9d4edd]/20 w-fit px-3 py-1.5 rounded-xl mb-8 shadow-[0_0_15px_rgba(157,78,221,0.1)]">
+                    CORE / OPTIMIZATION
+                </div>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight mb-4">Zoptymalizowany pod scheduler procesora</h2>
+                    <p class="text-gray-400 text-sm md:text-base font-light leading-relaxed">
+                        Wykorzystujemy zaawansowane mechanizmy kolejkowania i przydziału czasu procesora w celu minimalizacji opóźnień wątków wejścia/wyjścia. Każdy cykl zegara skupia się na aplikacjach użytkownika, odcinając zbędne procesy w tle.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bento-card p-8 md:p-10 rounded-3xl flex flex-col justify-between reveal">
+                <div class="flex justify-between items-start">
+                    <div class="text-xs font-mono font-semibold text-gray-400 bg-white/5 border border-white/5 px-3 py-1.5 rounded-xl">
+                        SYSTEM
+                    </div>
+                    <span class="text-xs font-mono text-gray-600 tracking-wider">01 / BASE</span>
+                </div>
+                <div class="mt-12">
+                    <h3 class="text-xl font-bold text-white mb-3">Baza systemu</h3>
+                    <p class="text-gray-400 text-xs md:text-sm font-light leading-relaxed mb-5">Budowane przy użyciu elastycznego środowiska Arch Linux oraz archinstall do optymalizacji bazowej.</p>
+                    <span class="font-mono text-xs font-semibold bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 text-gray-300">x86_64 Native</span>
+                </div>
+            </div>
+
+            <div class="bento-card p-8 md:p-10 rounded-3xl flex flex-col justify-between reveal">
+                <div class="flex justify-between items-start">
+                    <div class="text-xs font-mono font-semibold text-[#c8b6ff] bg-[#9d4edd]/5 border border-[#9d4edd]/10 px-3 py-1.5 rounded-xl">
+                        UI / ENVIRONMENT
+                    </div>
+                    <span class="text-xs font-mono text-gray-600 tracking-wider">02 / INTERFACE</span>
+                </div>
+                <div class="mt-12">
+                    <h3 class="text-xl font-bold text-white mb-3">Środowisko GNOME</h3>
+                    <p class="text-gray-400 text-xs md:text-sm font-light leading-relaxed">Stawiamy na nowoczesne i stabilne środowisko GNOME działające natywnie na Waylandzie. Czysty, płynny i zoptymalizowany pod maksymalną produktywność interfejs bez zbędnych nakładek.</p>
+                </div>
+            </div>
+
+            <div class="bento-card col-span-1 md:col-span-2 p-8 md:p-10 rounded-3xl flex flex-col justify-between reveal" id="specs">
+                <div class="flex justify-between items-start mb-8">
+                    <div class="text-xs font-mono font-semibold text-gray-400 bg-white/5 border border-white/5 px-3 py-1.5 rounded-xl">
+                        SPECIFICATIONS
+                    </div>
+                    <span class="text-xs font-mono text-gray-600 tracking-wider">03 / TECH SPECS</span>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-5">Założenia techniczne ekosystemu</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono text-gray-400">
+                        <div class="p-4 bg-black/30 border border-white/5 rounded-2xl flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-[#9d4edd] shadow-[0_0_8px_#9d4edd]"></span> Kernel: Optimized Performance Build
+                        </div>
+                        <div class="p-4 bg-black/30 border border-white/5 rounded-2xl flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></span> Desktop: GNOME on Wayland
+                        </div>
+                        <div class="p-4 bg-black/30 border border-white/5 rounded-2xl flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></span> Package Manager: Pacman / AUR
+                        </div>
+                        <div class="p-4 bg-black/30 border border-white/5 rounded-2xl flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)]"></span> Ecosystem: Minimal & Bloat-free
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-card p-8 md:p-10 rounded-3xl flex flex-col justify-between reveal" id="about">
+                <div class="text-xs font-mono font-semibold text-[#c8b6ff] bg-[#9d4edd]/10 border border-[#9d4edd]/20 w-fit px-3 py-1.5 rounded-xl">
+                    MISSION / WHY
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold text-white mb-3">Po co to wszystko?</h3>
+                    <p class="text-gray-400 text-xs md:text-sm font-light leading-relaxed">
+                        Większość nowoczesnych systemów cierpi na przerost formy nad treścią — śledzenie, zbędne usługi i gigantyczne zużycie RAM-u na start. DolinaOS powstaje, by udowodnić, że system operacyjny może być ultratransparentny, piekielnie szybki i w 100% kontrolowany przez użytkownika.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bento-card col-span-1 md:col-span-2 p-8 md:p-10 rounded-3xl flex flex-col justify-between reveal">
+                <div class="text-xs font-mono font-semibold text-gray-400 bg-white/5 border border-white/5 px-3 py-1.5 rounded-xl w-fit">
+                    TARGET / AUDIENCE
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">Dla kogo budujemy DolinaOS?</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-sm font-bold text-white mb-1">Dla Pasjonatów i Deweloperów</h4>
+                            <p class="text-gray-400 text-xs font-light leading-relaxed">
+                                Czyste środowisko POSIX, natywne wsparcie dla najnowszych kontenerów i brak jakichkolwiek barier architektury. Idealna stacja robocza do kodu.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-[#c8b6ff] mb-1">Dla Zwolenników Wydajności</h4>
+                            <p class="text-gray-400 text-xs font-light leading-relaxed">
+                                Jeśli liczy się dla Ciebie każda klatka w grach, brak micro-stutteringu i błyskawiczne renderowanie UI na Waylandzie — to miejsce dla Ciebie.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-card col-span-1 md:col-span-3 p-8 rounded-3xl reveal">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <span class="text-[10px] font-mono text-gray-600 block mb-1">04 / ADVANTAGES</span>
+                        <h3 class="text-lg font-bold text-white">Na co to komu? Korzyści w pigułce:</h3>
+                    </div>
+                    <div class="flex flex-wrap gap-3 text-xs font-mono">
+                        <span class="bg-white/5 border border-white/5 px-3 py-1.5 rounded-xl text-gray-300">0% Telemetrii</span>
+                        <span class="bg-white/5 border border-white/5 px-3 py-1.5 rounded-xl text-gray-300">Pełny dostęp do AUR</span>
+                        <span class="bg-[#9d4edd]/10 border border-[#9d4edd]/20 px-3 py-1.5 rounded-xl text-[#c8b6ff]">Zoptymalizowany Kernel</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <section id="screenshots" class="max-w-6xl mx-auto px-6 pb-28 relative z-10 reveal">
+        <div class="text-center mb-12">
+            <span class="text-xs font-mono font-bold text-[#c8b6ff] bg-[#9d4edd]/10 border border-[#9d4edd]/20 px-3 py-1.5 rounded-xl">
+                INTERFACE / GALLERY
+            </span>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mt-4">Zrzuty ekranu systemu</h2>
+        </div>
+
+        <div class="bento-card p-8 rounded-3xl text-center max-w-3xl mx-auto mb-10 border-dashed border-[#9d4edd]/30">
+            <div class="w-12 h-12 rounded-2xl bg-[#9d4edd]/10 border border-[#9d4edd]/30 flex items-center justify-center mx-auto mb-4 text-[#c8b6ff] shadow-[0_0_15px_rgba(157,78,221,0.1)]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2 font-mono">Materiały w przygotowaniu</h3>
+            <p class="text-gray-400 text-sm font-light leading-relaxed max-w-xl mx-auto">
+                Pierwsze oficjalne zrzuty ekranu ze zoptymalizowanego środowiska GNOME, kompozytora Wayland oraz dedykowanego motywu graficznego pojawią się już wkrótce po zakończeniu testów stabilności UI!
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 opacity-40 select-none pointer-events-none">
+            <div class="aspect-video bg-gradient-to-br from-[#130924] to-black border border-white/5 rounded-2xl flex items-center justify-center font-mono text-xs text-zinc-600">
+                [ desktop_overview.png ]
+            </div>
+            <div class="aspect-video bg-gradient-to-br from-[#130924] to-black border border-white/5 rounded-2xl flex items-center justify-center font-mono text-xs text-zinc-600">
+                [ terminal_neofetch.png ]
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="max-w-4xl mx-auto px-6 pb-24 relative z-10 reveal">
+        <div class="text-center mb-12">
+            <span class="text-xs font-mono font-bold text-[#c8b6ff] bg-[#9d4edd]/10 border border-[#9d4edd]/20 px-3 py-1.5 rounded-xl">
+                QUESTIONS / ANSWERS
+            </span>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mt-4">Najczęściej zadawane pytania</h2>
+        </div>
+
+        <div class="space-y-4" id="faq-accordion">
+            <div class="faq-item rounded-2xl overflow-hidden">
+                <button class="faq-trigger w-full p-6 flex justify-between items-center text-left font-semibold text-white select-none cursor-pointer focus:outline-none">
+                    <span>Czy DolinaOS jest dystrybucją niezmienną (immutable)?</span>
+                    <span class="faq-toggle text-gray-500 font-mono text-lg font-light pointer-events-none">+</span>
+                </button>
+                <div class="faq-content-wrapper">
+                    <div class="overflow-hidden">
+                        <div class="px-6 pb-6 text-gray-400 text-sm font-light leading-relaxed border-t border-white/5 pt-4 bg-black/10">
+                            Nie, DolinaOS nie jest systemem tradycyjnie niezmiennym. Zamiast tego dostarczamy maksymalnie odchudzony, bazowy zestaw pakietów. Domyślnie rekomendujemy izolowanie aplikacji użytkowych, ale zaawansowani użytkownicy mają pełną swobodę zarządzania pakietami poprzez menedżer <code class="font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded text-gray-200">pacman</code> oraz repozytorium AUR.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item rounded-2xl overflow-hidden">
+                <button class="faq-trigger w-full p-6 flex justify-between items-center text-left font-semibold text-white select-none cursor-pointer focus:outline-none">
+                    <span>Na czym dokładnie bazuje ten system?</span>
+                    <span class="faq-toggle text-gray-500 font-mono text-lg font-light pointer-events-none">+</span>
+                </button>
+                <div class="faq-content-wrapper">
+                    <div class="overflow-hidden">
+                        <div class="px-6 pb-6 text-gray-400 text-sm font-light leading-relaxed border-t border-white/5 pt-4 bg-black/10">
+                            Sercem systemu jest sprawdzona, stabilna i najszybsza baza dystrybucji Arch Linux. Wykorzystujemy instalator <code class="font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded text-gray-200">archinstall</code> do stworzenia perfekcyjnego środowiska bazowego, na które nakładamy nasze optymalizacje konfiguracji i desktopu.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item rounded-2xl overflow-hidden">
+                <button class="faq-trigger w-full p-6 flex justify-between items-center text-left font-semibold text-white select-none cursor-pointer focus:outline-none">
+                    <span>Dlaczego wybór padł na środowisko GNOME?</span>
+                    <span class="faq-toggle text-gray-500 font-mono text-lg font-light pointer-events-none">+</span>
+                </button>
+                <div class="faq-content-wrapper">
+                    <div class="overflow-hidden">
+                        <div class="px-6 pb-6 text-gray-400 text-sm font-light leading-relaxed border-t border-white/5 pt-4 bg-black/10">
+                            GNOME oferuje bezkonkurencyjną stabilność i pełne, dojrzałe wsparcie dla kompozytora Wayland. Zamiast pisać interfejs graficzny od zera i walczyć z błędami, skupiamy się na maksymalnym odchudzeniu środowiska z "bloatu", odpowiedniej konfiguracji oraz dostarczeniu czystego, minimalistycznego workflow dla deweloperów i graczy.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item rounded-2xl overflow-hidden">
+                <button class="faq-trigger w-full p-6 flex justify-between items-center text-left font-semibold text-white select-none cursor-pointer focus:outline-none">
+                    <span>Skąd mogę pobrać najnowszy obraz ISO?</span>
+                    <span class="faq-toggle text-gray-500 font-mono text-lg font-light pointer-events-none">+</span>
+                </button>
+                <div class="faq-content-wrapper">
+                    <div class="overflow-hidden">
+                        <div class="px-6 pb-6 text-gray-400 text-sm font-light leading-relaxed border-t border-white/5 pt-4 bg-black/10">
+                            Projekt jest obecnie w aktywnej fazie deweloperskiej (budowa bazowa i konfiguracja pakietów). Oficjalne kompilacje ISO zostaną udostępnione do pobrania publicznego bezpośrednio na tej stronie oraz w wydaniach (Releases) na naszym GitHubie zaraz po zakończeniu testów stabilności środowiska.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="community" class="py-24 text-center border-t border-white/5 relative bg-[#0f0518]/60 z-10 reveal">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-4xl font-bold text-white mb-4">Projekt Open-Source</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto mb-8 font-light leading-relaxed">
+                DolinaOS powstaje w oparciu o całkowicie otwarty kod źródłowy. Możesz przeglądać architekturę, zgłaszać poprawki lub stworzyć własny fork bezpośrednio w serwisie GitHub.
+            </p>
+            <a href="https://github.com/royalekk/DolinaOS" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-[#9d4edd]/20 hover:bg-[#9d4edd]/30 text-white px-8 py-4 rounded-xl font-bold border border-[#9d4edd]/40 shadow-[0_0_25px_rgba(157,78,221,0.2)] backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer">
+                Zobacz repozytorium GitHub
+            </a>
+        </div>
+    </section>
+
+    <div id="yt-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md opacity-0 pointer-events-none">
+        <div class="bg-[#130924]/80 border border-[#9d4edd]/40 max-w-sm w-full p-6 rounded-2xl shadow-[0_0_50px_rgba(157,78,221,0.35)] text-center transform scale-95 transition-all duration-300">
+            <div class="text-xs font-mono font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1 w-fit mx-auto mb-4">
+                YOUTUBE STATUS
+            </div>
+            <h4 class="text-xl font-bold text-white mb-2">Kanał YouTube</h4>
+            <p class="text-gray-400 text-sm font-light leading-relaxed mb-6">
+                Materiały wideo i prezentacje systemu DolinaOS są obecnie w przygotowaniu. Oficjalny kanał ruszy już wkrótce!
+            </p>
+            <button onclick="closeYtModal()" class="w-full py-2.5 bg-[#9d4edd]/20 border border-[#9d4edd]/40 text-white rounded-xl text-xs font-bold hover:bg-[#9d4edd]/30 active:scale-[0.98] transition-all cursor-pointer">
+                Rozumiem
+            </button>
+        </div>
+    </div>
+
+    <footer class="border-t border-white/5 bg-[#0f0518]/40 relative z-10">
+        <div class="max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-gray-600">
+            <div class="flex items-center gap-2 font-mono text-xs text-gray-500 select-none">
+                <span>2026</span>
+            </div>
+            <div class="flex gap-4">
+                <a href="https://github.com/royalekk/DolinaOS" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-gray-500 hover:text-white transition-colors">GitHub</a>
+                <button onclick="openYtModal()" class="text-xs font-mono text-gray-500 hover:text-red-400 transition-colors cursor-pointer">YouTube</button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // SKRYPT DLA FAQ AKORDEONU
+        document.querySelectorAll('.faq-trigger').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const currentItem = trigger.closest('.faq-item');
+                const isOpen = currentItem.classList.contains('active');
+
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                if (!isOpen) {
+                    currentItem.classList.add('active');
+                }
+            });
+        });
+
+        // Skrypt Liquid Glass Navbar
+        const navbarContainer = document.getElementById('navbar-container');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 30) {
+                navbarContainer.classList.add('scrolled');
+                navbarContainer.classList.remove('h-20');
+                navbarContainer.classList.add('h-14');
+            } else {
+                navbarContainer.classList.remove('scrolled');
+                navbarContainer.classList.remove('h-14');
+                navbarContainer.classList.add('h-20');
+            }
+        });
+
+        // Skrypt Reveal on Scroll
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.12
+        });
+
+        revealElements.forEach(element => {
+            revealOnScroll.observe(element);
+        });
+
+        // Obsługa modala YouTube
+        const modal = document.getElementById('yt-modal');
+        const modalBox = modal.querySelector('div');
+
+        function openYtModal() {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalBox.classList.remove('scale-95');
+            modalBox.classList.add('scale-100');
+        }
+
+        function closeYtModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalBox.classList.remove('scale-100');
+            modalBox.classList.add('scale-95');
+        }
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeYtModal();
+        });
+    </script>
+</body>
 </html>
