@@ -1,16 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite'; // Jeśli używasz Tailwind 4
+import tailwindcss from '@tailwindcss/vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(),
+                            tailwindcss(),
+                            tsconfigPaths(),
   ],
-  base: '/DolinaOS/', // To jest kluczowe dla GitHub Pages!
-  server: {
-    port: 3000,
-  },
+  base: '/DolinaOS/',
   build: {
     outDir: 'dist',
   },
