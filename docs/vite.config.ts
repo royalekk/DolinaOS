@@ -9,8 +9,9 @@ export default defineConfig({
                             tailwindcss(),
                             tsconfigPaths(),
   ],
-  base: '/DolinaOS/',
+  base: './',
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
   },
 });
